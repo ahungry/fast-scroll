@@ -38,6 +38,7 @@
 (defvar fast-scroll-mode-line-original mode-line-format)
 (defvar fast-scroll-pending-reset nil)
 (defvar fast-scroll-timeout 0)
+(defvar fast-scroll-count 0)
 
 (defun fast-scroll-default-mode-line ()
   "An Emacs default/bare bones mode-line."
@@ -61,33 +62,49 @@
   "Re-enable the things we disabled during the fast scroll."
   (when (fast-scroll-end?)
     (setq mode-line-format fast-scroll-mode-line-original)
-    (font-lock-mode 1)))
+    (font-lock-mode 1)
+    (setq fast-scroll-count 0)))
 
-(defun fast-scroll-up ()
+(defun fast-scroll-run-fn-minimally (f)
   "Enables lightning fast scrolling up/down by disabling certain
   modes that can frequently cause a slow down during scrolling."
-  (interactive)
-  (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
-  (setq mode-line-format (fast-scroll-default-mode-line))
-  (font-lock-mode 0)
-  (ignore-errors (scroll-up-command))
+  (setq fast-scroll-count (+ 1 fast-scroll-count))
+  (if (< fast-scroll-count 2)
+      (ignore-errors (funcall f))
+    (progn
+      (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
+      (setq mode-line-format (fast-scroll-default-mode-line))
+      (font-lock-mode 0)
+      (ignore-errors (funcall f))))
   (run-at-time 0.05 nil #'fast-scroll-end))
 
-(defun fast-scroll-down ()
-  "Enables lightning fast scrolling up/down by disabling certain
-  modes that can frequently cause a slow down during scrolling."
+(defun fast-scroll-scroll-up-command ()
+  "Scroll up quickly - comparative to 'scroll-up-command."
   (interactive)
-  (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
-  (setq mode-line-format (fast-scroll-default-mode-line))
-  (font-lock-mode 0)
-  (ignore-errors (scroll-down-command))
-  (run-at-time 0.05 nil #'fast-scroll-end))
+  (fast-scroll-run-fn-minimally #'scroll-up-command))
+
+(defun fast-scroll-scroll-down-command ()
+  "Scroll down quickly - comparative to #'scroll-down-command."
+  (interactive)
+  (fast-scroll-run-fn-minimally #'scroll-down-command))
+
+(defun fast-scroll-evil-scroll-up ()
+  "Scroll down quickly - comparative to #'evil-scroll-up."
+  (interactive)
+  (fast-scroll-run-fn-minimally #'evil-scroll-up))
+
+(defun fast-scroll-evil-scroll-down ()
+  "Scroll down quickly - comparative to #'evil-scroll-down."
+  (interactive)
+  (fast-scroll-run-fn-minimally #'evil-scroll-down))
 
 ;;;###autoload
 (defun fast-scroll-config ()
   "Load some config defaults / binds."
-  (global-set-key (kbd "<prior>") 'fast-scroll-down)
-  (global-set-key (kbd "<next>") 'fast-scroll-up))
+  (global-set-key (kbd "<prior>") 'fast-scroll-scroll-down-command)
+  (global-set-key (kbd "<next>") 'fast-scroll-scroll-up-command))
+
+(fast-scroll-config)
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here
