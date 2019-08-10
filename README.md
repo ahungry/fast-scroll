@@ -23,6 +23,12 @@ In your init file add something such as:
 
 it will wrap some common scroll commands.
 
+This works really well when you turn up repeat rate in Xorg as well:
+
+```
+xset r rate 250 60
+```
+
 # Copyright
 
 Matthew Carter <m@ahungry.com>
