@@ -102,26 +102,6 @@
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-down))
 
-(defun fast-scroll-advice-add-to-fn (f)
-  "Wrap a function F in this logic for optimizations."
-  (advice-add f :around #'fast-scroll-run-fn-minimally))
-
-(defun fast-scroll-advice-add-to-scroll-down-command ()
-  "Wrap `scroll-down-command' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'scroll-down-command))
-
-(defun fast-scroll-advice-add-to-scroll-up-command ()
-  "Wrap `scroll-up-command' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'scroll-up-command))
-
-(defun fast-scroll-advice-add-to-evil-scroll-down ()
-  "Wrap `evil-scroll-down' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'evil-scroll-down))
-
-(defun fast-scroll-advice-add-to-evil-scroll-up ()
-  "Wrap `evil-scroll-up' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'evil-scroll-up))
-
 ;;;###autoload
 (defun fast-scroll-config ()
   "Load some config defaults / binds."
@@ -133,10 +113,20 @@
 (defun fast-scroll-advice-scroll-functions ()
   "Wrap as many scrolling functions that we know of in this advice."
   (interactive)
-  (fast-scroll-advice-add-to-evil-scroll-down)
-  (fast-scroll-advice-add-to-evil-scroll-up)
-  (fast-scroll-advice-add-to-scroll-down-command)
-  (fast-scroll-advice-add-to-scroll-up-command))
+  (advice-add #'scroll-up-command :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'scroll-down-command :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'evil-scroll-up :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'evil-scroll-down :around #'fast-scroll-run-fn-minimally))
+
+(defun fast-scroll-unload-function ()
+  "Remove advice added by `fast-scroll-advice-scroll-functions'.
+Note this function's name implies compatibility with `unload-feature'."
+  (interactive)
+  (advice-remove #'scroll-up-command #'fast-scroll-run-fn-minimally)
+  (advice-remove #'scroll-down-command #'fast-scroll-run-fn-minimally)
+  (advice-remove #'evil-scroll-up #'fast-scroll-run-fn-minimally)
+  (advice-remove #'evil-scroll-down #'fast-scroll-run-fn-minimally)
+  nil)
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here
