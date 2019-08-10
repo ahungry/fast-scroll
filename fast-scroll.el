@@ -6,8 +6,8 @@
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/fast-scroll
 ;; Version: 0.0.1
-;; Keywords: ahungry fast scroll scrolling
-;; Package-Requires: ((emacs "25.1"))
+;; Keywords: ahungry convenience fast scroll scrolling
+;; Package-Requires: ((emacs "25.1") (evil "0.0.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -34,6 +34,7 @@
 ;;; Code:
 
 ;; Fix for slow scrolling
+(require 'evil)
 
 (defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
@@ -105,10 +106,21 @@
   "Wrap a function F in this logic for optimizations."
   (advice-add f :around #'fast-scroll-run-fn-minimally))
 
-(defun fast-scroll-advice-add-to-scroll-down-command () (fast-scroll-advice-add-to-fn #'scroll-down-command))
-(defun fast-scroll-advice-add-to-scroll-up-command () (fast-scroll-advice-add-to-fn #'scroll-up-command))
-(defun fast-scroll-advice-add-to-evil-scroll-down () (fast-scroll-advice-add-to-fn #'evil-scroll-down))
-(defun fast-scroll-advice-add-to-evil-scroll-up () (fast-scroll-advice-add-to-fn #'evil-scroll-up))
+(defun fast-scroll-advice-add-to-scroll-down-command ()
+  "Wrap `scroll-down-command' with the fast-scroll features."
+  (fast-scroll-advice-add-to-fn #'scroll-down-command))
+
+(defun fast-scroll-advice-add-to-scroll-up-command ()
+  "Wrap `scroll-up-command' with the fast-scroll features."
+  (fast-scroll-advice-add-to-fn #'scroll-up-command))
+
+(defun fast-scroll-advice-add-to-evil-scroll-down ()
+  "Wrap `evil-scroll-down' with the fast-scroll features."
+  (fast-scroll-advice-add-to-fn #'evil-scroll-down))
+
+(defun fast-scroll-advice-add-to-evil-scroll-up ()
+  "Wrap `evil-scroll-up' with the fast-scroll features."
+  (fast-scroll-advice-add-to-fn #'evil-scroll-up))
 
 ;;;###autoload
 (defun fast-scroll-config ()
