@@ -65,17 +65,17 @@
     (font-lock-mode 1)
     (setq fast-scroll-count 0)))
 
-(defun fast-scroll-run-fn-minimally (f)
+(defun fast-scroll-run-fn-minimally (f &rest r)
   "Enables lightning fast scrolling up/down by disabling certain
   modes that can frequently cause a slow down during scrolling."
   (setq fast-scroll-count (+ 1 fast-scroll-count))
   (if (< fast-scroll-count 2)
-      (ignore-errors (funcall f))
+      (ignore-errors (apply f r))
     (progn
       (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
       (setq mode-line-format (fast-scroll-default-mode-line))
       (font-lock-mode 0)
-      (ignore-errors (funcall f))))
+      (ignore-errors (apply f r))))
   (run-at-time 0.05 nil #'fast-scroll-end))
 
 (defun fast-scroll-scroll-up-command ()
@@ -98,13 +98,30 @@
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-down))
 
+(defun fast-scroll-advice-add-to-fn (f)
+  "Wrap a function in this logic for optimizations."
+  (advice-add f :around #'fast-scroll-run-fn-minimally))
+
+(defun fast-scroll-advice-add-to-scroll-down-command () (fast-scroll-advice-add-to-fn #'scroll-down-command))
+(defun fast-scroll-advice-add-to-scroll-up-command () (fast-scroll-advice-add-to-fn #'scroll-up-command))
+(defun fast-scroll-advice-add-to-evil-scroll-down () (fast-scroll-advice-add-to-fn #'evil-scroll-down))
+(defun fast-scroll-advice-add-to-evil-scroll-up () (fast-scroll-advice-add-to-fn #'evil-scroll-up))
+
 ;;;###autoload
 (defun fast-scroll-config ()
   "Load some config defaults / binds."
+  (interactive)
   (global-set-key (kbd "<prior>") 'fast-scroll-scroll-down-command)
   (global-set-key (kbd "<next>") 'fast-scroll-scroll-up-command))
 
-(fast-scroll-config)
+;;;###autoload
+(defun fast-scroll-advice-scroll-functions ()
+  "Wrap as many scrolling functions that we know of in this advice."
+  (interactive)
+  (fast-scroll-advice-add-to-evil-scroll-down)
+  (fast-scroll-advice-add-to-evil-scroll-up)
+  (fast-scroll-advice-add-to-scroll-down-command)
+  (fast-scroll-advice-add-to-scroll-up-command))
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here
