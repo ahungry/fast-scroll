@@ -35,7 +35,7 @@
 
 ;; Fix for slow scrolling
 
-(defvar fast-scroll-mode-line-original mode-line-format)
+(defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
 (defvar fast-scroll-timeout 0)
 (defvar fast-scroll-count 0)
@@ -68,15 +68,19 @@
 (defun fast-scroll-run-fn-minimally (f &rest r)
   "Enables lightning fast scrolling up/down by disabling certain
   modes that can frequently cause a slow down during scrolling."
+  (unless fast-scroll-mode-line-original
+    (setq fast-scroll-mode-line-original mode-line-format))
   (setq fast-scroll-count (+ 1 fast-scroll-count))
   (if (< fast-scroll-count 2)
-      (ignore-errors (apply f r))
+      (progn
+        (ignore-errors (apply f r))
+        (run-at-time 0.05 nil (lambda () (setq fast-scroll-count 0))))
     (progn
       (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
       (setq mode-line-format (fast-scroll-default-mode-line))
       (font-lock-mode 0)
-      (ignore-errors (apply f r))))
-  (run-at-time 0.05 nil #'fast-scroll-end))
+      (ignore-errors (apply f r))
+      (run-at-time 0.05 nil #'fast-scroll-end))))
 
 (defun fast-scroll-scroll-up-command ()
   "Scroll up quickly - comparative to 'scroll-up-command."
@@ -108,18 +112,16 @@
 (defun fast-scroll-advice-add-to-evil-scroll-up () (fast-scroll-advice-add-to-fn #'evil-scroll-up))
 
 ;;;###autoload
-(defun fast-scroll-config (mode-line-format-original)
+(defun fast-scroll-config ()
   "Load some config defaults / binds."
   (interactive)
-  (setq fast-scroll-mode-line-original mode-line-format-original)
   (global-set-key (kbd "<prior>") 'fast-scroll-scroll-down-command)
   (global-set-key (kbd "<next>") 'fast-scroll-scroll-up-command))
 
 ;;;###autoload
-(defun fast-scroll-advice-scroll-functions (mode-line-format-original)
+(defun fast-scroll-advice-scroll-functions ()
   "Wrap as many scrolling functions that we know of in this advice."
   (interactive)
-  (setq fast-scroll-mode-line-original mode-line-format-original)
   (fast-scroll-advice-add-to-evil-scroll-down)
   (fast-scroll-advice-add-to-evil-scroll-up)
   (fast-scroll-advice-add-to-scroll-down-command)
