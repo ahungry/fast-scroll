@@ -108,16 +108,18 @@
 (defun fast-scroll-advice-add-to-evil-scroll-up () (fast-scroll-advice-add-to-fn #'evil-scroll-up))
 
 ;;;###autoload
-(defun fast-scroll-config ()
+(defun fast-scroll-config (mode-line-format-original)
   "Load some config defaults / binds."
   (interactive)
+  (setq fast-scroll-mode-line-original mode-line-format-original)
   (global-set-key (kbd "<prior>") 'fast-scroll-scroll-down-command)
   (global-set-key (kbd "<next>") 'fast-scroll-scroll-up-command))
 
 ;;;###autoload
-(defun fast-scroll-advice-scroll-functions ()
+(defun fast-scroll-advice-scroll-functions (mode-line-format-original)
   "Wrap as many scrolling functions that we know of in this advice."
   (interactive)
+  (setq fast-scroll-mode-line-original mode-line-format-original)
   (fast-scroll-advice-add-to-evil-scroll-down)
   (fast-scroll-advice-add-to-evil-scroll-up)
   (fast-scroll-advice-add-to-scroll-down-command)
