@@ -56,13 +56,13 @@
   "Get the current MS in float up to 3 precision."
   (read (format-time-string "%s.%3N")))
 
-(defun fast-scroll-end? ()
+(defun fast-scroll-end-p ()
   "See if we can end or not."
   (> (- (fast-scroll-get-milliseconds) fast-scroll-timeout) 0.04))
 
 (defun fast-scroll-end ()
   "Re-enable the things we disabled during the fast scroll."
-  (when (fast-scroll-end?)
+  (when (fast-scroll-end-p)
     (setq mode-line-format fast-scroll-mode-line-original)
     (font-lock-mode 1)
     (setq fast-scroll-count 0)))
@@ -76,30 +76,29 @@
       (progn
         (ignore-errors (apply f r))
         (run-at-time 0.05 nil (lambda () (setq fast-scroll-count 0))))
-    (progn
-      (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
-      (setq mode-line-format (fast-scroll-default-mode-line))
-      (font-lock-mode 0)
-      (ignore-errors (apply f r))
-      (run-at-time 0.05 nil #'fast-scroll-end))))
+    (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
+    (setq mode-line-format (fast-scroll-default-mode-line))
+    (font-lock-mode 0)
+    (ignore-errors (apply f r))
+    (run-at-time 0.05 nil #'fast-scroll-end)))
 
 (defun fast-scroll-scroll-up-command ()
-  "Scroll up quickly - comparative to 'scroll-up-command."
+  "Scroll up quickly - comparative to `scroll-up-command'."
   (interactive)
   (fast-scroll-run-fn-minimally #'scroll-up-command))
 
 (defun fast-scroll-scroll-down-command ()
-  "Scroll down quickly - comparative to #'scroll-down-command."
+  "Scroll down quickly - comparative to `scroll-down-command'."
   (interactive)
   (fast-scroll-run-fn-minimally #'scroll-down-command))
 
 (defun fast-scroll-evil-scroll-up ()
-  "Scroll down quickly - comparative to #'evil-scroll-up."
+  "Scroll down quickly - comparative to `evil-scroll-up'."
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-up))
 
 (defun fast-scroll-evil-scroll-down ()
-  "Scroll down quickly - comparative to #'evil-scroll-down."
+  "Scroll down quickly - comparative to `evil-scroll-down'."
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-down))
 
