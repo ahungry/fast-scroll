@@ -10,6 +10,19 @@ help alleviate that a bit for you.
 It works by temporarily disabling font-lock and switching to a
 barebones mode-line, until you stop scrolling (at which point it re-enables).
 
+# Usage
+
+In your init file add something such as:
+
+```elisp
+(add-to-list 'load-path "~/src/elisp/fast-scroll") ; Or wherever you cloned it
+(require 'fast-scroll)
+(fast-scroll-config)
+(fast-scroll-advice-scroll-functions)
+```
+
+it will wrap some common scroll commands.
+
 # Copyright
 
 Matthew Carter <m@ahungry.com>
