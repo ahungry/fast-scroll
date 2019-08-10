@@ -7,7 +7,7 @@
 ;; URL: https://github.com/ahungry/fast-scroll
 ;; Version: 0.0.1
 ;; Keywords: ahungry convenience fast scroll scrolling
-;; Package-Requires: ((emacs "25.1") (evil "0.0.1"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -34,7 +34,8 @@
 ;;; Code:
 
 ;; Fix for slow scrolling
-(require 'evil)
+(declare-function evil-scroll-up "ext:evil-commands.el" (count) t)
+(declare-function evil-scroll-down "ext:evil-commands.el" (count) t)
 
 (defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
