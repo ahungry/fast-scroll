@@ -66,8 +66,7 @@
     (setq fast-scroll-count 0)))
 
 (defun fast-scroll-run-fn-minimally (f &rest r)
-  "Enables lightning fast scrolling up/down by disabling certain
-  modes that can frequently cause a slow down during scrolling."
+  "Enables fast execution on function F with args R, by disabling certain modes."
   (unless fast-scroll-mode-line-original
     (setq fast-scroll-mode-line-original mode-line-format))
   (setq fast-scroll-count (+ 1 fast-scroll-count))
@@ -103,7 +102,7 @@
   (fast-scroll-run-fn-minimally #'evil-scroll-down))
 
 (defun fast-scroll-advice-add-to-fn (f)
-  "Wrap a function in this logic for optimizations."
+  "Wrap a function F in this logic for optimizations."
   (advice-add f :around #'fast-scroll-run-fn-minimally))
 
 (defun fast-scroll-advice-add-to-scroll-down-command () (fast-scroll-advice-add-to-fn #'scroll-down-command))
