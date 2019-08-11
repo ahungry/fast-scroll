@@ -7,7 +7,7 @@
 ;; URL: https://github.com/ahungry/fast-scroll
 ;; Version: 0.0.1
 ;; Keywords: ahungry convenience fast scroll scrolling
-;; Package-Requires: ((emacs "25.1") (evil "0.0.1"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -34,7 +34,8 @@
 ;;; Code:
 
 ;; Fix for slow scrolling
-(require 'evil)
+(declare-function evil-scroll-up "ext:evil-commands.el" (count) t)
+(declare-function evil-scroll-down "ext:evil-commands.el" (count) t)
 
 (defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
@@ -55,13 +56,13 @@
   "Get the current MS in float up to 3 precision."
   (read (format-time-string "%s.%3N")))
 
-(defun fast-scroll-end? ()
+(defun fast-scroll-end-p ()
   "See if we can end or not."
   (> (- (fast-scroll-get-milliseconds) fast-scroll-timeout) 0.04))
 
 (defun fast-scroll-end ()
   "Re-enable the things we disabled during the fast scroll."
-  (when (fast-scroll-end?)
+  (when (fast-scroll-end-p)
     (setq mode-line-format fast-scroll-mode-line-original)
     (font-lock-mode 1)
     (setq fast-scroll-count 0)))
@@ -75,52 +76,31 @@
       (progn
         (ignore-errors (apply f r))
         (run-at-time 0.05 nil (lambda () (setq fast-scroll-count 0))))
-    (progn
-      (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
-      (setq mode-line-format (fast-scroll-default-mode-line))
-      (font-lock-mode 0)
-      (ignore-errors (apply f r))
-      (run-at-time 0.05 nil #'fast-scroll-end))))
+    (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
+    (setq mode-line-format (fast-scroll-default-mode-line))
+    (font-lock-mode 0)
+    (ignore-errors (apply f r))
+    (run-at-time 0.05 nil #'fast-scroll-end)))
 
 (defun fast-scroll-scroll-up-command ()
-  "Scroll up quickly - comparative to 'scroll-up-command."
+  "Scroll up quickly - comparative to `scroll-up-command'."
   (interactive)
   (fast-scroll-run-fn-minimally #'scroll-up-command))
 
 (defun fast-scroll-scroll-down-command ()
-  "Scroll down quickly - comparative to #'scroll-down-command."
+  "Scroll down quickly - comparative to `scroll-down-command'."
   (interactive)
   (fast-scroll-run-fn-minimally #'scroll-down-command))
 
 (defun fast-scroll-evil-scroll-up ()
-  "Scroll down quickly - comparative to #'evil-scroll-up."
+  "Scroll down quickly - comparative to `evil-scroll-up'."
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-up))
 
 (defun fast-scroll-evil-scroll-down ()
-  "Scroll down quickly - comparative to #'evil-scroll-down."
+  "Scroll down quickly - comparative to `evil-scroll-down'."
   (interactive)
   (fast-scroll-run-fn-minimally #'evil-scroll-down))
-
-(defun fast-scroll-advice-add-to-fn (f)
-  "Wrap a function F in this logic for optimizations."
-  (advice-add f :around #'fast-scroll-run-fn-minimally))
-
-(defun fast-scroll-advice-add-to-scroll-down-command ()
-  "Wrap `scroll-down-command' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'scroll-down-command))
-
-(defun fast-scroll-advice-add-to-scroll-up-command ()
-  "Wrap `scroll-up-command' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'scroll-up-command))
-
-(defun fast-scroll-advice-add-to-evil-scroll-down ()
-  "Wrap `evil-scroll-down' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'evil-scroll-down))
-
-(defun fast-scroll-advice-add-to-evil-scroll-up ()
-  "Wrap `evil-scroll-up' with the fast-scroll features."
-  (fast-scroll-advice-add-to-fn #'evil-scroll-up))
 
 ;;;###autoload
 (defun fast-scroll-config ()
@@ -133,10 +113,20 @@
 (defun fast-scroll-advice-scroll-functions ()
   "Wrap as many scrolling functions that we know of in this advice."
   (interactive)
-  (fast-scroll-advice-add-to-evil-scroll-down)
-  (fast-scroll-advice-add-to-evil-scroll-up)
-  (fast-scroll-advice-add-to-scroll-down-command)
-  (fast-scroll-advice-add-to-scroll-up-command))
+  (advice-add #'scroll-up-command :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'scroll-down-command :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'evil-scroll-up :around #'fast-scroll-run-fn-minimally)
+  (advice-add #'evil-scroll-down :around #'fast-scroll-run-fn-minimally))
+
+(defun fast-scroll-unload-function ()
+  "Remove advice added by `fast-scroll-advice-scroll-functions'.
+Note this function's name implies compatibility with `unload-feature'."
+  (interactive)
+  (advice-remove #'scroll-up-command #'fast-scroll-run-fn-minimally)
+  (advice-remove #'scroll-down-command #'fast-scroll-run-fn-minimally)
+  (advice-remove #'evil-scroll-up #'fast-scroll-run-fn-minimally)
+  (advice-remove #'evil-scroll-down #'fast-scroll-run-fn-minimally)
+  nil)
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here
