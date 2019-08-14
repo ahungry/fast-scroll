@@ -41,6 +41,8 @@
 (defvar fast-scroll-pending-reset nil)
 (defvar fast-scroll-timeout 0)
 (defvar fast-scroll-count 0)
+(defvar fast-scroll-throttle 0.2)
+(defvar fast-scroll-throttling-p nil)
 
 (defun fast-scroll-default-mode-line ()
   "An Emacs default/bare bones mode-line."
@@ -58,13 +60,16 @@
 
 (defun fast-scroll-end-p ()
   "See if we can end or not."
-  (> (- (fast-scroll-get-milliseconds) fast-scroll-timeout) 0.04))
+  (> (- (fast-scroll-get-milliseconds) fast-scroll-timeout) (- fast-scroll-throttle 0.01)))
 
 (defun fast-scroll-end ()
   "Re-enable the things we disabled during the fast scroll."
   (when (fast-scroll-end-p)
     (setq mode-line-format fast-scroll-mode-line-original)
     (font-lock-mode 1)
+    (when (functionp 'flycheck-mode)
+      (flycheck-mode 1))
+    (setq fast-scroll-throttling-p nil)
     (setq fast-scroll-count 0)))
 
 (defun fast-scroll-run-fn-minimally (f &rest r)
@@ -75,12 +80,18 @@
   (if (< fast-scroll-count 2)
       (progn
         (ignore-errors (apply f r))
-        (run-at-time 0.05 nil (lambda () (setq fast-scroll-count 0))))
+        (run-at-time fast-scroll-throttle nil (lambda () (setq fast-scroll-count 0))))
     (setq fast-scroll-timeout (fast-scroll-get-milliseconds))
-    (setq mode-line-format (fast-scroll-default-mode-line))
-    (font-lock-mode 0)
-    (ignore-errors (apply f r))
-    (run-at-time 0.05 nil #'fast-scroll-end)))
+    (if fast-scroll-throttling-p
+        (ignore-errors (apply f r))
+      (progn
+        (setq mode-line-format (fast-scroll-default-mode-line))
+        (font-lock-mode 0)
+        (when (functionp 'flycheck-mode)
+          (flycheck-mode -1))
+        (ignore-errors (apply f r))))
+    (run-at-time fast-scroll-throttle nil #'fast-scroll-end)
+    (setq fast-scroll-throttling-p t)))
 
 (defun fast-scroll-scroll-up-command ()
   "Scroll up quickly - comparative to `scroll-up-command'."

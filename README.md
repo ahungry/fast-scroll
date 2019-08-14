@@ -29,6 +29,15 @@ This works really well when you turn up repeat rate in Xorg as well:
 xset r rate 250 60
 ```
 
+# Customization
+
+You can adjust the 'throttle' rate (how fast subsequent scroll
+commands must come in bound) as such:
+
+```elisp
+(setq fast-scroll-throttle 0.5)
+```
+
 # Copyright
 
 Matthew Carter <m@ahungry.com>
