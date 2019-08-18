@@ -17,6 +17,10 @@ In your init file add something such as:
 ```elisp
 (add-to-list 'load-path "~/src/elisp/fast-scroll") ; Or wherever you cloned it
 (require 'fast-scroll)
+;; If you would like to turn on/off other modes, like flycheck, add
+;; your own hooks.
+(add-hook 'fast-scroll-start-hook (lambda () (flycheck-mode -1)))
+(add-hook 'fast-scroll-end-hook (lambda () (flycheck-mode 1)))
 (fast-scroll-config)
 (fast-scroll-advice-scroll-functions)
 ```

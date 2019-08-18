@@ -44,6 +44,9 @@
 (defvar fast-scroll-throttle 0.2)
 (defvar fast-scroll-throttling-p nil)
 
+(defvar fast-scroll-start-hook '())
+(defvar fast-scroll-end-hook '())
+
 (defun fast-scroll-default-mode-line ()
   "An Emacs default/bare bones mode-line."
   (list "%e" mode-line-front-space
@@ -67,8 +70,7 @@
   (when (fast-scroll-end-p)
     (setq mode-line-format fast-scroll-mode-line-original)
     (font-lock-mode 1)
-    (when (functionp 'flycheck-mode)
-      (flycheck-mode 1))
+    (run-hooks 'fast-scroll-end-hook)
     (setq fast-scroll-throttling-p nil)
     (setq fast-scroll-count 0)))
 
@@ -87,8 +89,7 @@
       (progn
         (setq mode-line-format (fast-scroll-default-mode-line))
         (font-lock-mode 0)
-        (when (functionp 'flycheck-mode)
-          (flycheck-mode -1))
+        (run-hooks 'fast-scroll-start-hook)
         (ignore-errors (apply f r))))
     (run-at-time fast-scroll-throttle nil #'fast-scroll-end)
     (setq fast-scroll-throttling-p t)))
