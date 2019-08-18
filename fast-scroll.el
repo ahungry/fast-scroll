@@ -37,6 +37,7 @@
 (declare-function evil-scroll-up "ext:evil-commands.el" (count) t)
 (declare-function evil-scroll-down "ext:evil-commands.el" (count) t)
 
+(defvar fast-scroll-minor-mode nil)
 (defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
 (defvar fast-scroll-timeout 0)
@@ -139,6 +140,31 @@ Note this function's name implies compatibility with `unload-feature'."
   (advice-remove #'evil-scroll-up #'fast-scroll-run-fn-minimally)
   (advice-remove #'evil-scroll-down #'fast-scroll-run-fn-minimally)
   nil)
+
+;;;###autoload
+(define-minor-mode fast-scroll-minor-mode
+  "Minor mode to speed up scrolling.
+
+When fast-scroll-minor-mode is on, certain features/modes of Emacs will be
+shut off or minimized during the scrolling activity, to ensure
+the user experience the least amount of scroll-lag as possible.
+
+By default, enabling this global minor mode will advice the following
+scrolling built-ins (or commonly installed scroll functions): `scroll-up-command',
+`scroll-down-command', `evil-scroll-up', `evil-scroll-down'.
+
+Disabling this mode will unload the advice that was added when enabling.
+
+The mode-line format will also be set to a minimal mode-line
+during scrolling activity."
+  :group 'fast-scroll
+  :global t
+  :lighter " fs"
+  (if fast-scroll-minor-mode
+      (progn
+      (fast-scroll-advice-scroll-functions))
+    (progn
+        (fast-scroll-unload-function))))
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here

@@ -22,7 +22,7 @@ In your init file add something such as:
 (add-hook 'fast-scroll-start-hook (lambda () (flycheck-mode -1)))
 (add-hook 'fast-scroll-end-hook (lambda () (flycheck-mode 1)))
 (fast-scroll-config)
-(fast-scroll-advice-scroll-functions)
+(fast-scroll-minor-mode 1)
 ```
 
 it will wrap some common scroll commands.
