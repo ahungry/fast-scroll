@@ -162,9 +162,9 @@ during scrolling activity."
   :lighter " fs"
   (if fast-scroll-minor-mode
       (progn
-      (fast-scroll-advice-scroll-functions))
+        (fast-scroll-advice-scroll-functions))
     (progn
-        (fast-scroll-unload-function))))
+      (fast-scroll-unload-function))))
 
 (provide 'fast-scroll)
 ;;; fast-scroll.el ends here
