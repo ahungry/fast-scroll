@@ -5,7 +5,7 @@
 ;; Author: Matthew Carter <m@ahungry.com>
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/fast-scroll
-;; Version: 0.0.3
+;; Version: 0.0.4
 ;; Keywords: ahungry convenience fast scroll scrolling
 ;; Package-Requires: ((emacs "25.1"))
 
@@ -37,7 +37,7 @@
 (declare-function evil-scroll-up "ext:evil-commands.el" (count) t)
 (declare-function evil-scroll-down "ext:evil-commands.el" (count) t)
 
-(defvar fast-scroll-minor-mode nil)
+(defvar fast-scroll-mode nil)
 (defvar fast-scroll-mode-line-original nil)
 (defvar fast-scroll-pending-reset nil)
 (defvar fast-scroll-timeout 0)
@@ -167,10 +167,10 @@ Note this function's name implies compatibility with `unload-feature'."
   nil)
 
 ;;;###autoload
-(define-minor-mode fast-scroll-minor-mode
+(define-minor-mode fast-scroll-mode
   "Minor mode to speed up scrolling.
 
-When fast-scroll-minor-mode is on, certain features/modes of Emacs will be
+When fast-scroll-mode is on, certain features/modes of Emacs will be
 shut off or minimized during the scrolling activity, to ensure
 the user experience the least amount of scroll-lag as possible.
 
@@ -185,7 +185,7 @@ during scrolling activity."
   :group 'fast-scroll
   :global t
   :lighter " fs"
-  (if fast-scroll-minor-mode
+  (if fast-scroll-mode
       (progn
         (fast-scroll-advice-scroll-functions))
     (progn
