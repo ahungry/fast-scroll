@@ -5,9 +5,9 @@
 ;; Author: Matthew Carter <m@ahungry.com>
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/fast-scroll
-;; Version: 0.0.4
+;; Version: 0.0.5
 ;; Keywords: ahungry convenience fast scroll scrolling
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "25.1") (cl-lib "0.6.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -32,6 +32,8 @@
 ;; with fast scrolling (usually via key-repeat instead of manual scrolling).
 
 ;;; Code:
+
+(require 'cl-lib)
 
 ;; Fix for slow scrolling
 (declare-function evil-scroll-up "ext:evil-commands.el" (count) t)
