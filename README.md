@@ -48,4 +48,4 @@ Matthew Carter <m@ahungry.com>
 
 # License
 
-AGPLv3 or later
+AGPLv3

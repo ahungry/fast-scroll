@@ -5,7 +5,7 @@
 ;; Author: Matthew Carter <m@ahungry.com>
 ;; Maintainer: Matthew Carter <m@ahungry.com>
 ;; URL: https://github.com/ahungry/fast-scroll
-;; Version: 0.0.5
+;; Version: 0.0.6
 ;; Keywords: ahungry convenience fast scroll scrolling
 ;; Package-Requires: ((emacs "25.1") (cl-lib "0.6.1"))
 
@@ -73,7 +73,7 @@
 
 (defun fast-scroll-get-milliseconds ()
   "Get the current MS in float up to 3 precision."
-  (read (format-time-string "%s.%3N")))
+  (string-to-number (format-time-string "%s.%3N")))
 
 (defun fast-scroll-end-p ()
   "See if we can end or not."
